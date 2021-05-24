@@ -16,7 +16,7 @@ export class Contract {
   constructor({product, signedDate}: Pick<ContractType, "product" | "signedDate">) {
     this.product = product;
     this.signedDate = signedDate;
-    this.revenue = 0;
-    this.revenueRecognitions = [];
+    this.revenue = 0; // TODO
+    this.revenueRecognitions = []; // TODO
   }
 }
