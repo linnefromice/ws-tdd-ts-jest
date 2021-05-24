@@ -1,10 +1,9 @@
-import { Category, Product } from "./product";
+import { WordProcessorProduct } from "./product";
 
-export class Ichitaro extends Product {
+export class Ichitaro extends WordProcessorProduct {
   constructor() {
     super({
       name: "一太郎",
-      category: Category.WordProcessor,
       price: 20000
     })
   }

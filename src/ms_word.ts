@@ -1,10 +1,9 @@
-import { Category, Product } from "./product";
+import { WordProcessorProduct } from "./product";
 
-export class MSWord extends Product {
+export class MSWord extends WordProcessorProduct {
   constructor() {
     super({
       name: "MS Word",
-      category: Category.WordProcessor,
       price: 18800
     })
   }

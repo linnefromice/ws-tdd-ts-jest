@@ -1,10 +1,9 @@
-import { Category, Product } from "./product";
+import { SpreadSheetProduct } from "./product";
 
-export class MSExcel extends Product {
+export class MSExcel extends SpreadSheetProduct {
   constructor() {
     super({
       name: "MS Excel",
-      category: Category.SpreadSheet,
       price: 27800
     })
   }

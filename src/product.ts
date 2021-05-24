@@ -20,3 +20,23 @@ export class Product {
     this.price = price;
   }
 }
+
+export class WordProcessorProduct extends Product {
+  constructor({name, price}: Pick<ProductType, 'name' | 'price'>) {
+    super({
+      name: name,
+      category: Category.WordProcessor,
+      price: price
+    })
+  }
+}
+
+export class SpreadSheetProduct extends Product {
+  constructor({name, price}: Pick<ProductType, 'name' | 'price'>) {
+    super({
+      name: name,
+      category: Category.SpreadSheet,
+      price: price
+    })
+  }
+}
