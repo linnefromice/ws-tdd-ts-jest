@@ -1,10 +1,10 @@
 export type RevenueRecognitionType = {
   date: string; // YYYYMMDD
-  amount: string;
+  amount: number;
 }
 export class RevenueRecognition {
   date: string; // YYYYMMDD
-  amount: string;
+  amount: number;
 
   constructor({date, amount}: RevenueRecognitionType) {
     this.date = date;
