@@ -6,7 +6,7 @@ import { Sanshiro } from "../sanshiro";
 
 function useFactory() {
   const createContract = (
-    {product = new MSWord(), signedDate = "20210524"}
+    {product = new MSWord(), signedDate = "2021-05-24"}
   ): Contract => new Contract({product: product, signedDate: signedDate});
 
   return {
@@ -48,24 +48,22 @@ describe('契約モデル', () => {
       expect(price).toEqual(contract.revenue);
     });
   });
-/*
   describe("契約成立をしたら、収益認識を返却する", () => {
     test("ワードプロセッサの場合", () => {
       const product = new MSWord();
       const contract = useFactory().createContract({product});
       const results = contract.signed();
       expect(18800).toEqual(results[0].amount);
-      expect("20210524").toEqual(results[0].date);
+      expect("2021-05-24").toEqual(results[0].date);
     });
     test("スプレッドシートの場合", () => {
       const product = new MSExcel();
       const contract = useFactory().createContract({product});
       const results = contract.signed();
       expect(27800 * 2/3).toEqual(results[0].amount);
-      expect("20210524").toEqual(results[0].date);
+      expect("2021-05-24").toEqual(results[0].date);
       expect(27800 * 1/3).toEqual(results[1].amount);
-      expect("20210624").toEqual(results[1].date);
+      expect("2021-06-23").toEqual(results[1].date);
     });
   });
-*/
 });

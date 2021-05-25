@@ -33,13 +33,14 @@ export class Contract {
         ];
         break;
       case Category.SpreadSheet:
+        
         this.revenueRecognitions = [
           new RevenueRecognition({
             date: this.signedDate,
             amount: this.product.price * 2/3
           }),
           new RevenueRecognition({
-            date: this.signedDate,
+            date: this.proceedDays(this.signedDate, 30),
             amount: this.product.price * 1/3
           })
         ];
@@ -48,6 +49,12 @@ export class Contract {
         this.revenueRecognitions = [];
         break;
     }
+  }
+
+  private proceedDays(baseDate: string, days: number): string {
+    const date = new Date(baseDate);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().substr(0, 10);
   }
 
   signed(): RevenueRecognition[] {
