@@ -56,14 +56,26 @@ describe('契約モデル', () => {
       expect(18800).toEqual(results[0].amount);
       expect("2021-05-24").toEqual(results[0].date);
     });
-    test("スプレッドシートの場合", () => {
-      const product = new MSExcel();
-      const contract = useFactory().createContract({product});
-      const results = contract.signed();
-      expect(27800 * 2/3).toEqual(results[0].amount);
-      expect("2021-05-24").toEqual(results[0].date);
-      expect(27800 * 1/3).toEqual(results[1].amount);
-      expect("2021-06-23").toEqual(results[1].date);
+    describe("スプレッドシートの", () => {
+      test("MS Excelの場合", () => {
+        const product = new MSExcel();
+        const contract = useFactory().createContract({product});
+        const results = contract.signed();
+        expect(18534).toEqual(results[0].amount);
+        expect("2021-05-24").toEqual(results[0].date);
+        expect(9266).toEqual(results[1].amount);
+        expect("2021-06-23").toEqual(results[1].date);
+      });
+      test("三四郎の場合", () => {
+        const product = new Sanshiro();
+        const contract = useFactory().createContract({product});
+        const results = contract.signed();
+        expect(3334).toEqual(results[0].amount);
+        expect("2021-05-24").toEqual(results[0].date);
+        expect(1666).toEqual(results[1].amount);
+        expect("2021-06-23").toEqual(results[1].date);
+      });
     });
+    
   });
 });

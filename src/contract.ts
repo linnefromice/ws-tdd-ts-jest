@@ -33,15 +33,15 @@ export class Contract {
         ];
         break;
       case Category.SpreadSheet:
-        
+        const firstPrice = Math.ceil(this.product.price * 2/3);
         this.revenueRecognitions = [
           new RevenueRecognition({
             date: this.signedDate,
-            amount: this.product.price * 2/3
+            amount: firstPrice
           }),
           new RevenueRecognition({
             date: this.proceedDays(this.signedDate, 30),
-            amount: this.product.price * 1/3
+            amount: this.product.price - firstPrice
           })
         ];
         break;
