@@ -1,15 +1,21 @@
 import { Contract } from "../contract";
+import { Category, Product } from "../product";
 import { MSWord } from "../ms_word";
 import { MSExcel } from "../ms_excel";
 import { Ichitaro } from "../ichitaro";
 import { Sanshiro } from "../sanshiro";
 
 function useFactory() {
+  const createProduct = (
+    {name = "Default Name", category = Category.WordProcessor, price = 0}
+  ): Product => new Product({name: name, category: category, price: price});
+
   const createContract = (
     {product = new MSWord(), signedDate = "2021-05-24"}
   ): Contract => new Contract({product: product, signedDate: signedDate});
 
   return {
+    createProduct: createProduct,
     createContract: createContract
   }
 }
@@ -48,15 +54,24 @@ describe('契約モデル', () => {
       expect(price).toEqual(contract.revenue);
     });
   });
-  describe("契約成立をしたら、収益認識を返却する", () => {
-    test("ワードプロセッサの場合", () => {
-      const product = new MSWord();
-      const contract = useFactory().createContract({product});
-      const results = contract.signed();
-      expect(18800).toEqual(results[0].amount);
-      expect("2021-05-24").toEqual(results[0].date);
+  describe("が契約成立をしたら、収益認識を返却する", () => {
+    describe('ワードプロセッサの場合、', () => {
+      const product = new MSWord()
+      test("収益認識を1件返すこと", () => {
+        const contract = useFactory().createContract({product});
+        expect(1).toEqual(contract.signed().length);
+      });
+      test("収益認識の日付が、契約日当日であること", () => {
+        const signedDate = "1970-01-01"
+        const contract = useFactory().createContract({product, signedDate});
+        expect(signedDate).toEqual(contract.signed()[0].date);
+      });
+      test("収益認識の売上が、製品価格の全額であること", () => {
+        const contract = useFactory().createContract({product});
+        expect(product.price).toEqual(contract.signed()[0].amount);
+      });
     });
-    describe("スプレッドシートの", () => {
+    describe("スプレッドシートの場合", () => {
       test("MS Excelの場合", () => {
         const product = new MSExcel();
         const contract = useFactory().createContract({product});
@@ -76,6 +91,5 @@ describe('契約モデル', () => {
         expect("2021-06-23").toEqual(results[1].date);
       });
     });
-    
   });
 });
