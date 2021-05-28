@@ -56,7 +56,7 @@ describe('契約モデル', () => {
   });
   describe("が契約成立をしたら、収益認識を返却する", () => {
     describe('ワードプロセッサの場合、', () => {
-      const product = new MSWord()
+      const product = new MSWord();
       test("収益認識を1件返すこと", () => {
         const contract = useFactory().createContract({product});
         expect(1).toEqual(contract.signed().length);
@@ -71,7 +71,32 @@ describe('契約モデル', () => {
         expect(product.price).toEqual(contract.signed()[0].amount);
       });
     });
-    describe("スプレッドシートの場合", () => {
+    describe("スプレッドシートの場合、", () => {
+      const product = new MSExcel();
+      const signedDate = "1970-01-01";
+      const contract = useFactory().createContract({product, signedDate});
+      const results = contract.signed();
+      test("収益認識を2件返すこと", () => {
+        expect(2).toEqual(results.length);
+      });
+      describe("1件目の収益認識の", () => {
+        test("日付が、契約日当日であること", () => {
+          expect(signedDate).toEqual(results[0].date);
+        });
+        test("売上が、製品価格の2/3であること(切上)", () => {
+          expect(18534).toEqual(results[0].amount);
+        });
+      });
+      describe("2件目の収益認識の", () => {
+        test("日付が、契約日当日であること", () => {
+          expect("1970-01-31").toEqual(results[1].date);
+        });
+        test("日付が、製品価格の1/3であること(切下)", () => {
+          expect(9266).toEqual(results[1].amount);
+        });
+      });
+    });
+    describe("製品", () => {
       test("MS Excelの場合", () => {
         const product = new MSExcel();
         const contract = useFactory().createContract({product});
