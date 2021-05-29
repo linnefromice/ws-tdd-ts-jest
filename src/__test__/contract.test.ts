@@ -96,6 +96,30 @@ describe('契約モデル', () => {
         });
       });
     });
+    describe("収益認識の総和は売り上げと完全一致する", () => {
+      test('カテゴリ"ワードプロセッサ"の場合', () => {
+        const category = Category.WordProcessor;
+        const price = 10000;
+        const product = useFactory().createProduct({category, price});
+        const contract = useFactory().createContract({product});
+        expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+      });
+      describe('カテゴリ"スプレッドシート"であり、', () => {
+        const category = Category.SpreadSheet;
+        test('製品価格が割り切れる場合', () => {
+          const price = 10000;
+          const product = useFactory().createProduct({category, price});
+          const contract = useFactory().createContract({product});
+          expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+        });
+        test('製品価格が割り切れない場合', () => {
+          const price = 10001;
+          const product = useFactory().createProduct({category, price});
+          const contract = useFactory().createContract({product});
+          expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+        });
+      });
+    });
     describe("製品", () => {
       test("MS Excelの場合", () => {
         const product = new MSExcel();
