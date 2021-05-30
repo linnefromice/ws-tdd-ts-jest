@@ -34,12 +34,26 @@ describe('契約モデル', () => {
   describe("は契約日を保有する", () => {
     test.each`
       signedDate | description
-      ${"19700101"} | ${"過去日"}
-      ${"20210521"} | ${"現在日"}
-      ${"20991231"} | ${"未来日"}
-    `('契約日が$descriptionである"%signedDate"の場合は、"%signedDate"を返却する', ({signedDate, description}) => {
+      ${"1970-01-01"} | ${"過去日"}
+      ${"2021-05-21"} | ${"現在日"}
+      ${"2099-12-31"} | ${"未来日"}
+    `('契約日が$descriptionである"%signedDate"の場合は、"%signedDate"を返却する', ({signedDate}) => {
       const contract = useFactory().createContract({signedDate});
       expect(signedDate).toEqual(contract.signedDate);
+    });
+    describe("契約日の形式が不正な場合は、errorとなる", () => {
+      test.each`
+        signedDate | format
+        ${"19700101"} | ${"YYYYMMDD"}
+        ${"1970/01/01"} | ${"YYYY/MM/DD"}
+        ${"70-01-01"} | ${"YYYY -> YY"}
+        ${"1970-1-01"} | ${"MM -> M"}
+        ${"1970-01-001"} | ${"DD -> DDD"}
+      `(' 形式:$format', ({signedDate}) => {
+        expect(() => {
+          useFactory().createContract({signedDate})
+        }).toThrowError(/SignedDate/);
+      });
     });
   });
   describe("は売上を返却する", () => {
