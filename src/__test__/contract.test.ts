@@ -20,15 +20,25 @@ function useFactory() {
   }
 }
 describe('契約モデル', () => {
-  describe("は製品を一つ保有する", () => {
+  describe("は製品を保有する", () => {
     test.each([
       ["MS Word", new MSWord()],
       ["MS Excel", new MSExcel()],
       ["一太郎", new Ichitaro()],
       ["三四郎", new Sanshiro()],
-    ])('%sを購入した場合、Contract.product = "%s" となること', (name, product) => {
+    ])('%sを購入した場合、一つ目のContract.product = "%s" となること', (name, product) => {
       const contract = useFactory().createContract({product});
-      expect(name).toEqual(contract.product.name);
+      expect(name).toEqual(contract.products[0].name);
+    });
+    test.each([2, 3, 10])(' 複数個購入が可能である: %s個の場合', (number) => {
+      const products = [...Array(number - 1)].map((_, i) => useFactory().createProduct({name: `name ${i+2}`}))
+      const contract = useFactory().createContract({product: useFactory().createProduct({name: `name 1`})});
+      for (const product of products) {
+        contract.purchase({product});
+      }
+      [...Array(number)].forEach((_, i) => {
+        expect(contract.products[i].name).toEqual(`name ${i+1}`);
+      });
     });
   });
   describe("は契約日を保有する", () => {
