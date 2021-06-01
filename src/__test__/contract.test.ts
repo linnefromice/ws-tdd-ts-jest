@@ -11,8 +11,8 @@ function useFactory() {
   ): Product => new Product({name: name, category: category, price: price});
 
   const createContract = (
-    {product = new MSWord(), signedDate = "2021-05-24"}
-  ): Contract => new Contract({product: product, signedDate: signedDate});
+    {product = new MSWord()}
+  ): Contract => new Contract({product: product});
 
   return {
     createProduct: createProduct,
@@ -48,7 +48,8 @@ describe('契約モデル', () => {
       ${"2021-05-21"} | ${"現在日"}
       ${"2099-12-31"} | ${"未来日"}
     `('契約日が$descriptionである"%signedDate"の場合は、"%signedDate"を返却する', ({signedDate}) => {
-      const contract = useFactory().createContract({signedDate});
+      const contract = useFactory().createContract({});
+      contract.signed({signedDate})
       expect(signedDate).toEqual(contract.signedDate);
     });
     describe("契約日の形式が不正な場合は、errorとなる", () => {
@@ -60,8 +61,9 @@ describe('契約モデル', () => {
         ${"1970-1-01"} | ${"MM -> M"}
         ${"1970-01-001"} | ${"DD -> DDD"}
       `(' 形式:$format', ({signedDate}) => {
+        const contract = useFactory().createContract({});
         expect(() => {
-          useFactory().createContract({signedDate})
+          contract.signed({signedDate})
         }).toThrowError(/SignedDate/);
       });
     });
@@ -83,23 +85,23 @@ describe('契約モデル', () => {
       const product = new MSWord();
       test("収益認識を1件返すこと", () => {
         const contract = useFactory().createContract({product});
-        expect(1).toEqual(contract.signed().length);
+        expect(1).toEqual(contract.signed({signedDate: "1970-01-01"}).length);
       });
       test("収益認識の日付が、契約日当日であること", () => {
         const signedDate = "1970-01-01"
-        const contract = useFactory().createContract({product, signedDate});
-        expect(signedDate).toEqual(contract.signed()[0].date);
+        const contract = useFactory().createContract({product});
+        expect(signedDate).toEqual(contract.signed({signedDate: "1970-01-01"})[0].date);
       });
       test("収益認識の売上が、製品価格の全額であること", () => {
         const contract = useFactory().createContract({product});
-        expect(product.price).toEqual(contract.signed()[0].amount);
+        expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"})[0].amount);
       });
     });
     describe("スプレッドシートの場合、", () => {
       const product = new MSExcel();
       const signedDate = "1970-01-01";
-      const contract = useFactory().createContract({product, signedDate});
-      const results = contract.signed();
+      const contract = useFactory().createContract({product});
+      const results = contract.signed({signedDate});
       test("収益認識を2件返すこと", () => {
         expect(2).toEqual(results.length);
       });
@@ -126,7 +128,7 @@ describe('契約モデル', () => {
         const price = 10000;
         const product = useFactory().createProduct({category, price});
         const contract = useFactory().createContract({product});
-        expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+        expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"}).reduce((prev, current) => prev + current.amount, 0));
       });
       describe('カテゴリ"スプレッドシート"であり、', () => {
         const category = Category.SpreadSheet;
@@ -134,13 +136,13 @@ describe('契約モデル', () => {
           const price = 10000;
           const product = useFactory().createProduct({category, price});
           const contract = useFactory().createContract({product});
-          expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+          expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"}).reduce((prev, current) => prev + current.amount, 0));
         });
         test('製品価格が割り切れない場合', () => {
           const price = 10001;
           const product = useFactory().createProduct({category, price});
           const contract = useFactory().createContract({product});
-          expect(product.price).toEqual(contract.signed().reduce((prev, current) => prev + current.amount, 0));
+          expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"}).reduce((prev, current) => prev + current.amount, 0));
         });
       });
     });
@@ -148,7 +150,7 @@ describe('契約モデル', () => {
       test("MS Excelの場合", () => {
         const product = new MSExcel();
         const contract = useFactory().createContract({product});
-        const results = contract.signed();
+        const results = contract.signed({signedDate: "2021-05-24"});
         expect(18534).toEqual(results[0].amount);
         expect("2021-05-24").toEqual(results[0].date);
         expect(9266).toEqual(results[1].amount);
@@ -157,7 +159,7 @@ describe('契約モデル', () => {
       test("三四郎の場合", () => {
         const product = new Sanshiro();
         const contract = useFactory().createContract({product});
-        const results = contract.signed();
+        const results = contract.signed({signedDate: "2021-05-24"});
         expect(3334).toEqual(results[0].amount);
         expect("2021-05-24").toEqual(results[0].date);
         expect(1666).toEqual(results[1].amount);

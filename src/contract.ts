@@ -11,11 +11,8 @@ export class Contract {
   revenue: number = 0;
   revenueRecognitions: RevenueRecognition[] = []
 
-  constructor({product, signedDate}: Pick<ContractType, "product" | "signedDate">) {
+  constructor({product}: Pick<ContractType, "product">) {
     this.purchase({product});
-    // dummy
-    this.validateSignedDate(signedDate);
-    this.signedDate = signedDate;
   }
 
   purchase({product}: Pick<ContractType, "product">) {
@@ -23,7 +20,9 @@ export class Contract {
     this.revenue = this.revenue + product.price;
   }
 
-  signed(): RevenueRecognition[] {
+  signed({signedDate}: {signedDate: string}): RevenueRecognition[] {
+    this.validateSignedDate(signedDate);
+    this.signedDate = signedDate;
     this.generateRevenueRecognitions(this.products[0]);
     return this.revenueRecognitions;
   }
