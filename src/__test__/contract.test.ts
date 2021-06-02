@@ -79,6 +79,19 @@ describe('契約モデル', () => {
       const contract = useFactory().createContract({product});
       expect(price).toEqual(contract.revenue);
     });
+    describe('複数個購入した場合は、売上が合計値であること', () => {
+      test.each`
+        product | price | number | revenue
+        ${new MSWord()} | ${new MSWord().price} | ${2} | ${37600}
+        ${new MSExcel()} | ${new MSExcel().price} | ${5} | ${139000}
+      `("$price x $number = $revenue となること", ({product, number, revenue}) => {
+        const contract = useFactory().createContract({product});
+        [...Array(number - 1)].forEach((_, i) => {
+          contract.purchase({product})
+        });
+        expect(revenue).toEqual(contract.revenue);
+      });
+    });
   });
   describe("が契約成立をしたら、収益認識を返却する", () => {
     describe('ワードプロセッサの場合、', () => {
