@@ -94,45 +94,62 @@ describe('契約モデル', () => {
     });
   });
   describe("が契約成立をしたら、収益認識を返却する", () => {
-    describe('ワードプロセッサの場合、', () => {
-      const product = new MSWord();
-      test("収益認識を1件返すこと", () => {
-        const contract = useFactory().createContract({product});
-        expect(1).toEqual(contract.signed({signedDate: "1970-01-01"}).length);
+    describe('プロダクト1つであり', () => {
+      describe('ワードプロセッサの場合、', () => {
+        const product = new MSWord();
+        test("収益認識を1件返すこと", () => {
+          const contract = useFactory().createContract({product});
+          expect(1).toEqual(contract.signed({signedDate: "1970-01-01"}).length);
+        });
+        test("収益認識の日付が、契約日当日であること", () => {
+          const signedDate = "1970-01-01"
+          const contract = useFactory().createContract({product});
+          expect(signedDate).toEqual(contract.signed({signedDate: "1970-01-01"})[0].date);
+        });
+        test("収益認識の売上が、製品価格の全額であること", () => {
+          const contract = useFactory().createContract({product});
+          expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"})[0].amount);
+        });
       });
-      test("収益認識の日付が、契約日当日であること", () => {
-        const signedDate = "1970-01-01"
+      describe("スプレッドシートの場合、", () => {
+        const product = new MSExcel();
+        const signedDate = "1970-01-01";
         const contract = useFactory().createContract({product});
-        expect(signedDate).toEqual(contract.signed({signedDate: "1970-01-01"})[0].date);
-      });
-      test("収益認識の売上が、製品価格の全額であること", () => {
-        const contract = useFactory().createContract({product});
-        expect(product.price).toEqual(contract.signed({signedDate: "1970-01-01"})[0].amount);
-      });
+        const results = contract.signed({signedDate});
+        test("収益認識を2件返すこと", () => {
+          expect(2).toEqual(results.length);
+        });
+        describe("1件目の収益認識の", () => {
+          test("日付が、契約日当日であること", () => {
+            expect(signedDate).toEqual(results[0].date);
+          });
+          test("売上が、製品価格の2/3であること(切上)", () => {
+            expect(18534).toEqual(results[0].amount);
+          });
+        });
+        describe("2件目の収益認識の", () => {
+          test("日付が、契約日当日であること", () => {
+            expect("1970-01-31").toEqual(results[1].date);
+          });
+          test("日付が、製品価格の1/3であること(切下)", () => {
+            expect(9266).toEqual(results[1].amount);
+          });
+        });
+      });    
     });
-    describe("スプレッドシートの場合、", () => {
-      const product = new MSExcel();
-      const signedDate = "1970-01-01";
-      const contract = useFactory().createContract({product});
-      const results = contract.signed({signedDate});
-      test("収益認識を2件返すこと", () => {
-        expect(2).toEqual(results.length);
-      });
-      describe("1件目の収益認識の", () => {
-        test("日付が、契約日当日であること", () => {
-          expect(signedDate).toEqual(results[0].date);
-        });
-        test("売上が、製品価格の2/3であること(切上)", () => {
-          expect(18534).toEqual(results[0].amount);
-        });
-      });
-      describe("2件目の収益認識の", () => {
-        test("日付が、契約日当日であること", () => {
-          expect("1970-01-31").toEqual(results[1].date);
-        });
-        test("日付が、製品価格の1/3であること(切下)", () => {
-          expect(9266).toEqual(results[1].amount);
-        });
+    describe("複数プロダクトであり、", () => {
+      test.each([2, 3, 10])('カテゴリ”ワードプロセッサ”1000円%s個の場合', (number) => {
+        const category = Category.WordProcessor;
+        const price = 1000;
+        const product = useFactory().createProduct({category, price});
+        const contract = useFactory().createContract({product});
+        const products = [...Array(number - 1)].map((_, i) => useFactory().createProduct({name: `name ${i+2}`}))
+        for (const product of products) {
+          contract.purchase({product});
+        }
+        const revenueRecognitions = contract.signed({signedDate: "1970-01-01"});
+        expect(number).toEqual(revenueRecognitions.length);
+        expect(number).toEqual(revenueRecognitions.filter(rec => rec.amount === 1000).length);
       });
     });
     describe("収益認識の総和は売り上げと完全一致する", () => {

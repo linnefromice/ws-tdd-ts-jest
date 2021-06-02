@@ -23,7 +23,9 @@ export class Contract {
   signed({signedDate}: {signedDate: string}): RevenueRecognition[] {
     this.validateSignedDate(signedDate);
     this.signedDate = signedDate;
-    this.generateRevenueRecognitions(this.products[0]);
+    for (const product of this.products) {
+      this.generateRevenueRecognitions(product);
+    }
     return this.revenueRecognitions;
   }
 
@@ -36,9 +38,12 @@ export class Contract {
     if (this.signedDate == null) {
       throw new Error("契約日が入力されていません");
     }
+    // 1製品に対しそれぞれ契約認識を作る
+    // 同日付だとしても別データ
     switch(product.category) {
       case Category.WordProcessor:
         this.revenueRecognitions = [
+          ...this.revenueRecognitions,
           new RevenueRecognition({
             date: this.signedDate,
             amount: this.products[0].price // dummy
@@ -48,6 +53,7 @@ export class Contract {
       case Category.SpreadSheet:
         const firstPrice = Math.ceil(this.products[0].price * 2/3); // dummy
         this.revenueRecognitions = [
+          ...this.revenueRecognitions,
           new RevenueRecognition({
             date: this.signedDate,
             amount: firstPrice
