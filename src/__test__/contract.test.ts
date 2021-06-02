@@ -143,12 +143,26 @@ describe('契約モデル', () => {
         const price = 1000;
         const product = useFactory().createProduct({category, price});
         const contract = useFactory().createContract({product});
-        const products = [...Array(number - 1)].map((_, i) => useFactory().createProduct({name: `name ${i+2}`}))
+        const products = [...Array(number - 1)].map((_, i) => useFactory().createProduct({category, price}))
         for (const product of products) {
           contract.purchase({product});
         }
         const revenueRecognitions = contract.signed({signedDate: "1970-01-01"});
         expect(number).toEqual(revenueRecognitions.length);
+        expect(number).toEqual(revenueRecognitions.filter(rec => rec.amount === 1000).length);
+      });
+      test.each([2, 3, 10])('カテゴリ”スプレッドシート”3000円%s個の場合', (number) => {
+        const category = Category.SpreadSheet;
+        const price = 3000;
+        const product = useFactory().createProduct({category, price});
+        const contract = useFactory().createContract({product});
+        const products = [...Array(number - 1)].map((_, i) => useFactory().createProduct({category, price}))
+        for (const product of products) {
+          contract.purchase({product});
+        }
+        const revenueRecognitions = contract.signed({signedDate: "1970-01-01"});
+        expect(number * 2).toEqual(revenueRecognitions.length);
+        expect(number).toEqual(revenueRecognitions.filter(rec => rec.amount === 2000).length);
         expect(number).toEqual(revenueRecognitions.filter(rec => rec.amount === 1000).length);
       });
     });
