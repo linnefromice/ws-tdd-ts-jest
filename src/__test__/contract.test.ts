@@ -47,7 +47,7 @@ describe('契約モデル', () => {
       ${"1970-01-01"} | ${"過去日"}
       ${"2021-05-21"} | ${"現在日"}
       ${"2099-12-31"} | ${"未来日"}
-    `('契約日が$descriptionである"%signedDate"の場合は、"%signedDate"を返却する', ({signedDate}) => {
+    `('契約日が$descriptionである"$signedDate"の場合は、"$signedDate"を返却する', ({signedDate}) => {
       const contract = useFactory().createContract({});
       contract.signed({signedDate})
       expect(signedDate).toEqual(contract.signedDate);
@@ -190,24 +190,38 @@ describe('契約モデル', () => {
         });
       });
     });
-    describe("製品", () => {
-      test("MS Excelの場合", () => {
+    describe("ユースケース", () => {
+      test("2月1日に'MS Word'が一つ売れる場合", () => {
+        const product = new MSWord();
+        const contract = useFactory().createContract({product});
+        const results = contract.signed({signedDate: "2021-02-01"});
+        expect(18800).toEqual(results[0].amount);
+        expect("2021-02-01").toEqual(results[0].date);
+      });
+      test("2月1日に'MS Excel'が一つ売れる場合", () => {
         const product = new MSExcel();
         const contract = useFactory().createContract({product});
-        const results = contract.signed({signedDate: "2021-05-24"});
+        const results = contract.signed({signedDate: "2021-02-01"});
         expect(18534).toEqual(results[0].amount);
-        expect("2021-05-24").toEqual(results[0].date);
+        expect("2021-02-01").toEqual(results[0].date);
         expect(9266).toEqual(results[1].amount);
-        expect("2021-06-23").toEqual(results[1].date);
+        expect("2021-03-03").toEqual(results[1].date);
       });
-      test("三四郎の場合", () => {
+      test("2月1日に'一太郎'が一つ売れる場合", () => {
+        const product = new Ichitaro();
+        const contract = useFactory().createContract({product});
+        const results = contract.signed({signedDate: "2021-02-01"});
+        expect(20000).toEqual(results[0].amount);
+        expect("2021-02-01").toEqual(results[0].date);
+      });
+      test("2月1日に'三四郎'が一つ売れる場合", () => {
         const product = new Sanshiro();
         const contract = useFactory().createContract({product});
-        const results = contract.signed({signedDate: "2021-05-24"});
+        const results = contract.signed({signedDate: "2021-02-01"});
         expect(3334).toEqual(results[0].amount);
-        expect("2021-05-24").toEqual(results[0].date);
+        expect("2021-02-01").toEqual(results[0].date);
         expect(1666).toEqual(results[1].amount);
-        expect("2021-06-23").toEqual(results[1].date);
+        expect("2021-03-03").toEqual(results[1].date);
       });
     });
   });
