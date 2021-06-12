@@ -26,9 +26,6 @@ describe('製品モデル', () => {
       const product = useFactory().createProduct({category: Category.SpreadSheet})
       expect("スプレッドシート").toEqual(product.category);
     });
-    test.skip('カテゴリはワードプロセッサ/スプレッドシート以外は含められない', () => {
-      // TODO: PowerPointのパターン
-    });
   });
   describe("は価格を持つ", () => {
     test('価格"10,000円"の製品は、Product#priceで"10000"を返す', () => {
